@@ -1,14 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HealthController } from './health.controller';
-import { User } from './entities/user.entity';
+import { User } from '@/features/users/entities/user.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -39,8 +35,6 @@ import { User } from './entities/user.entity';
         };
       },
     }),
-    TypeOrmModule.forFeature([User]),
   ],
-  controllers: [HealthController],
 })
-export class AppModule {}
+export class DatabaseModule {}

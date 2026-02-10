@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User } from '@/features/users/entities/user.entity';
 
 function numberFromEnv(value: string | undefined, fallback: number) {
   if (!value) return fallback;
@@ -20,4 +20,3 @@ export const AppDataSource = new DataSource({
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });
-
