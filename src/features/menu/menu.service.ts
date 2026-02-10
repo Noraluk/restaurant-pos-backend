@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import { buildPaginatedResult, Paginated, PaginationParams } from '@/shared/pagination';
 import { MenuItem } from './entities/menu.entity';
 import { MenuRepository } from './menu.repository';
 
@@ -19,9 +20,19 @@ export class MenuService {
     private readonly configService: ConfigService,
   ) {}
 
-  async list(req?: any): Promise<MenuDto[]> {
-    const items = await this.menuRepository.findAll();
-    return items.map((item) => this.toDto(item, req));
+  async list(
+    req: any,
+    params: PaginationParams,
+  ): Promise<Paginated<MenuDto>> {
+    const [rows, total] = await this.menuRepository.findPage({
+      skip: params.skip,
+      take: params.take,
+    });
+
+    return buildPaginatedResult(
+      rows.map((item) => this.toDto(item, req)),
+      { page: params.page, limit: params.limit, total },
+    );
   }
 
   async getById(id: string, req?: any): Promise<MenuDto> {

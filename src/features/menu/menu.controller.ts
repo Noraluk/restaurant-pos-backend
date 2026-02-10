@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -15,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
 import { existsSync, mkdirSync } from 'fs';
 import { extname, join } from 'path';
+import { parsePagination } from '@/shared/pagination';
 import { MenuService } from './menu.service';
 
 const { diskStorage } = require('multer');
@@ -35,8 +37,17 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
   @Get()
-  list(@Req() req: any) {
-    return this.menuService.list(req);
+  list(
+    @Req() req: any,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    try {
+      const pagination = parsePagination({ page, limit });
+      return this.menuService.list(req, pagination);
+    } catch (err) {
+      throw new BadRequestException((err as Error).message);
+    }
   }
 
   @Get(':id')

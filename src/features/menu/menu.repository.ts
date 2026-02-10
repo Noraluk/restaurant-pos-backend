@@ -14,6 +14,14 @@ export class MenuRepository {
     return this.menuRepo.find({ order: { createdAt: 'DESC' } });
   }
 
+  findPage(params: { skip: number; take: number }) {
+    return this.menuRepo.findAndCount({
+      order: { createdAt: 'DESC' },
+      skip: params.skip,
+      take: params.take,
+    });
+  }
+
   findById(id: string) {
     return this.menuRepo.findOne({ where: { id } });
   }
