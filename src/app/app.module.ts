@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '@/database/database.module';
 import { HealthModule } from '@/features/health/health.module';
 import { LineModule } from '@/features/line/line.module';
+import { MenuModule } from '@/features/menu/menu.module';
 import { UsersModule } from '@/features/users/users.module';
 
 @Module({
@@ -14,6 +15,7 @@ import { UsersModule } from '@/features/users/users.module';
     UsersModule,
     HealthModule,
     LineModule,
+    MenuModule,
   ],
 })
 export class AppModule {}

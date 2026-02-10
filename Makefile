@@ -66,4 +66,4 @@ migrate-revert:
 
 migrate-generate:
 	@test -n "$(NAME)" || (echo "NAME is required, example: make migrate-generate NAME=AddOrdersTable" && exit 1)
-	docker compose exec -T api sh -lc "npm run migration:generate -- src/migrations/$(NAME)"
+	docker compose exec -T api sh -lc "npm run migration:generate -- src/database/migrations/$(NAME)"
