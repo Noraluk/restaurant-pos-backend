@@ -22,7 +22,7 @@ help:
 	"  app-build        npm run build"
 
 up:
-	docker compose up -d
+	docker compose up
 
 down:
 	docker compose down

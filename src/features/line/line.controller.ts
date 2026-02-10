@@ -8,7 +8,7 @@ export class LineController {
   @Get('connect/url')
   getConnectUrl(@Query('state') state?: string) {
     try {
-      return { url: this.lineService.getAuthUrl({ state }) };
+      return this.lineService.getAuthUrl({ state });
     } catch (err) {
       throw new BadRequestException((err as Error).message);
     }
@@ -17,9 +17,25 @@ export class LineController {
   @Get('connect/callback')
   async connectCallback(
     @Query('code') code: string,
+    @Query('error') error?: string,
+    @Query('error_description') errorDescription?: string,
+    @Query('state') state?: string,
     @Query('includeToken') includeToken?: string,
   ) {
-    if (!code) throw new BadRequestException('code is required');
+    if (error) {
+      throw new BadRequestException({
+        error,
+        errorDescription,
+        state,
+      });
+    }
+
+    if (!code) {
+      throw new BadRequestException({
+        message: 'code is required',
+        hint: 'Start via /line/connect/url to get the login URL (includes state).',
+      });
+    }
 
     let token;
     let profile;

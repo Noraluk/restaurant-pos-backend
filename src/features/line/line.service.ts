@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 
 type LineTokenResponse = {
   access_token: string;
@@ -24,15 +25,16 @@ export class LineService {
   getAuthUrl(params: { state?: string } = {}) {
     const clientId = this.requireEnv('LINE_CHANNEL_ID');
     const redirectUri = this.requireEnv('LINE_REDIRECT_URI');
+    const state = params.state ?? randomUUID();
 
     const url = new URL('https://access.line.me/oauth2/v2.1/authorize');
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('client_id', clientId);
     url.searchParams.set('redirect_uri', redirectUri);
     url.searchParams.set('scope', 'profile openid');
-    if (params.state) url.searchParams.set('state', params.state);
+    url.searchParams.set('state', state);
 
-    return url.toString();
+    return { url: url.toString(), state };
   }
 
   async exchangeCodeForAccessToken(code: string): Promise<LineTokenResponse> {
