@@ -11,6 +11,16 @@ COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY src ./src
 RUN npm run build
 
+FROM node:20-alpine AS dev
+WORKDIR /app
+ENV NODE_ENV=development
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY tsconfig.json tsconfig.build.json nest-cli.json ./
+COPY src ./src
+EXPOSE 8081
+CMD ["npm", "run", "start:dev"]
+
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production

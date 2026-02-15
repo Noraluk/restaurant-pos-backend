@@ -48,9 +48,17 @@ export class LineController {
     }
 
     const shouldIncludeToken =
-      includeToken === '1' || includeToken === 'true' || includeToken === 'yes';
+      includeToken === undefined ||
+      includeToken === null ||
+      includeToken === '' ||
+      includeToken === '1' ||
+      includeToken === 'true' ||
+      includeToken === 'yes';
 
-    if (!shouldIncludeToken) return { profile };
+    const shouldOmitToken =
+      includeToken === '0' || includeToken === 'false' || includeToken === 'no';
+
+    if (!shouldIncludeToken || shouldOmitToken) return { profile };
 
     return {
       profile,

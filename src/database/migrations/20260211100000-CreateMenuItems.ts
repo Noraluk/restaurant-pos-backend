@@ -4,6 +4,7 @@ export class CreateMenuItems20260211100000 implements MigrationInterface {
   name = 'CreateMenuItems20260211100000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
     await queryRunner.query(`
       CREATE TABLE "menu_items" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),

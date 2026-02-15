@@ -1,7 +1,12 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { User } from '@/features/users/entities/user.entity';
+import { MenuCategory } from '@/features/menu/entities/menu-category.entity';
 import { MenuItem } from '@/features/menu/entities/menu.entity';
+import { Order } from '@/features/orders/entities/order.entity';
+import { OrderHistory } from '@/features/orders/entities/order-history.entity';
+import { OrderHistoryItem } from '@/features/orders/entities/order-history-item.entity';
+import { OrderItem } from '@/features/orders/entities/order-item.entity';
 
 function numberFromEnv(value: string | undefined, fallback: number) {
   if (!value) return fallback;
@@ -17,7 +22,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DATABASE_URL ? undefined : process.env.DB_USER ?? 'postgres',
   password: process.env.DATABASE_URL ? undefined : process.env.DB_PASSWORD ?? 'postgres',
   database: process.env.DATABASE_URL ? undefined : process.env.DB_NAME ?? 'restaurant_pos',
-  entities: [User, MenuItem],
+  entities: [User, MenuCategory, MenuItem, Order, OrderItem, OrderHistory, OrderHistoryItem],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });

@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import { Repository } from 'typeorm';
 import { buildPaginatedResult, Paginated, PaginationParams } from '@/shared/pagination';
+import { MenuCategory } from './entities/menu-category.entity';
 import { MenuItem } from './entities/menu.entity';
 import { MenuRepository } from './menu.repository';
 
@@ -11,6 +14,7 @@ type MenuDto = {
   name: string;
   price: number;
   imageUrl: string | null;
+  categoryId: string | null;
 };
 
 @Injectable()
@@ -18,15 +22,19 @@ export class MenuService {
   constructor(
     private readonly menuRepository: MenuRepository,
     private readonly configService: ConfigService,
+    @InjectRepository(MenuCategory)
+    private readonly menuCategoryRepo: Repository<MenuCategory>,
   ) {}
 
   async list(
     req: any,
     params: PaginationParams,
+    filters: { categoryId?: string },
   ): Promise<Paginated<MenuDto>> {
     const [rows, total] = await this.menuRepository.findPage({
       skip: params.skip,
       take: params.take,
+      categoryId: filters.categoryId,
     });
 
     return buildPaginatedResult(
@@ -42,13 +50,24 @@ export class MenuService {
   }
 
   async create(
-    input: { name: string; price: number; imageKey?: string | null },
+    input: { name: string; price: number; imageKey?: string | null; categoryId?: string | null },
     req?: any,
   ): Promise<MenuDto> {
+    let categoryId = input.categoryId ?? null;
+    if (typeof categoryId === 'string') {
+      categoryId = categoryId.trim() ? categoryId.trim() : null;
+    }
+
+    if (categoryId) {
+      const exists = await this.menuCategoryRepo.findOne({ where: { id: categoryId } });
+      if (!exists) throw new NotFoundException('menu category not found');
+    }
+
     const entity = this.menuRepository.create({
       name: input.name,
       price: input.price.toFixed(2),
       imageKey: input.imageKey ?? null,
+      categoryId,
     });
     const saved = await this.menuRepository.save(entity);
     return this.toDto(saved, req);
@@ -56,7 +75,7 @@ export class MenuService {
 
   async update(
     id: string,
-    input: { name?: string; price?: number; imageKey?: string | null },
+    input: { name?: string; price?: number; imageKey?: string | null; categoryId?: string | null },
     req?: any,
   ): Promise<MenuDto> {
     const item = await this.menuRepository.findById(id);
@@ -69,6 +88,20 @@ export class MenuService {
       const oldKey = item.imageKey;
       item.imageKey = input.imageKey;
       if (oldKey && oldKey !== input.imageKey) await this.safeDeleteImage(oldKey);
+    }
+
+    if (input.categoryId !== undefined) {
+      let categoryId = input.categoryId;
+      if (typeof categoryId === 'string') {
+        categoryId = categoryId.trim() ? categoryId.trim() : null;
+      }
+
+      if (categoryId) {
+        const exists = await this.menuCategoryRepo.findOne({ where: { id: categoryId } });
+        if (!exists) throw new NotFoundException('menu category not found');
+      }
+
+      item.categoryId = categoryId ?? null;
     }
 
     const saved = await this.menuRepository.save(item);
@@ -92,6 +125,7 @@ export class MenuService {
       name: item.name,
       price: Number(item.price),
       imageUrl,
+      categoryId: item.categoryId ?? null,
     };
   }
 

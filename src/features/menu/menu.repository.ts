@@ -14,8 +14,9 @@ export class MenuRepository {
     return this.menuRepo.find({ order: { createdAt: 'DESC' } });
   }
 
-  findPage(params: { skip: number; take: number }) {
+  findPage(params: { skip: number; take: number; categoryId?: string }) {
     return this.menuRepo.findAndCount({
+      where: params.categoryId ? { categoryId: params.categoryId } : {},
       order: { createdAt: 'DESC' },
       skip: params.skip,
       take: params.take,

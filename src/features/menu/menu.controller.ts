@@ -41,10 +41,11 @@ export class MenuController {
     @Req() req: any,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('categoryId') categoryId?: string,
   ) {
     try {
       const pagination = parsePagination({ page, limit });
-      return this.menuService.list(req, pagination);
+      return this.menuService.list(req, pagination, { categoryId });
     } catch (err) {
       throw new BadRequestException((err as Error).message);
     }
@@ -74,6 +75,7 @@ export class MenuController {
   async create(
     @Body('name') name: string,
     @Body('price') price: string,
+    @Body('categoryId') categoryId?: string,
     @UploadedFile() file?: any,
     @Req() req?: any,
   ) {
@@ -85,8 +87,17 @@ export class MenuController {
       throw new BadRequestException('image must be an image');
     }
 
+    const normalizedCategoryId = typeof categoryId === 'string' ? categoryId.trim() : undefined;
     const imageKey = file ? `menu/${file.filename}` : null;
-    return this.menuService.create({ name, price: parsedPrice, imageKey }, req);
+    return this.menuService.create(
+      {
+        name,
+        price: parsedPrice,
+        imageKey,
+        categoryId: normalizedCategoryId ? normalizedCategoryId : null,
+      },
+      req,
+    );
   }
 
   @Patch(':id')
@@ -109,11 +120,16 @@ export class MenuController {
     @Param('id') id: string,
     @Body('name') name?: string,
     @Body('price') price?: string,
+    @Body('categoryId') categoryId?: string,
     @UploadedFile() file?: any,
     @Req() req?: any,
   ) {
-    const updateInput: { name?: string; price?: number; imageKey?: string | null } =
-      {};
+    const updateInput: {
+      name?: string;
+      price?: number;
+      imageKey?: string | null;
+      categoryId?: string | null;
+    } = {};
 
     if (name !== undefined) {
       if (!name) throw new BadRequestException('name is invalid');
@@ -131,6 +147,11 @@ export class MenuController {
         throw new BadRequestException('image must be an image');
       }
       updateInput.imageKey = `menu/${file.filename}`;
+    }
+
+    if (categoryId !== undefined) {
+      const normalizedCategoryId = categoryId.trim();
+      updateInput.categoryId = normalizedCategoryId ? normalizedCategoryId : null;
     }
 
     return this.menuService.update(id, updateInput, req);
