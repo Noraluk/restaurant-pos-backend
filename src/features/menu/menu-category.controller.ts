@@ -12,7 +12,7 @@ import {
 import { parsePagination } from '@/shared/pagination';
 import { MenuCategoryService } from './menu-category.service';
 
-@Controller('_internal/menu-categories')
+@Controller('menu-categories')
 export class MenuCategoryController {
   constructor(private readonly menuCategoryService: MenuCategoryService) {}
 
@@ -29,6 +29,11 @@ export class MenuCategoryController {
       throw new BadRequestException((err as Error).message);
     }
   }
+}
+
+@Controller('_internal/menu-categories')
+export class MenuCategoryInternalController {
+  constructor(private readonly menuCategoryService: MenuCategoryService) {}
 
   @Get(':id')
   getById(@Param('id') id: string) {
